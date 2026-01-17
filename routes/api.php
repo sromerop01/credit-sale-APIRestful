@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\LoanRoadController;
+use App\Http\Controllers\UserController;
+use App\Models\LoanRoad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,5 +14,11 @@ Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
 
     // Test endpoint
     Route::get('test', fn() => 'API is working!')->name('api.test');
+
+    //Route::apiResource('users', UserController::class);
+
+    //Route::apiResource('loan-roads', LoanRoadController::class);
+
+    //Route::apiResource('customers', CustomerController::class);
 
 });

@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +21,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
+        'level',
     ];
 
     /**
@@ -31,6 +34,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     /**
@@ -44,5 +50,23 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relación para las rutas donde el usuario es el Vendedor (user_id).
+     */
+    public function loanRoads()
+    {
+        // Laravel asume automáticamente que la llave foránea es 'user_id'
+        return $this->hasMany(LoanRoad::class);
+    }
+
+    /**
+     * Relación para las rutas donde el usuario es el Supervisor (supervisor_id).
+     */
+    public function supervisedLoanRoads()
+    {
+        // Aquí debemos especificar 'supervisor_id' porque no sigue la convención por defecto
+        return $this->hasMany(LoanRoad::class, 'supervisor_id');
     }
 }

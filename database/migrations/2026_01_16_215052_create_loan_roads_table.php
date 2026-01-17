@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('detail');
             $table->date('start_date');
             $table->decimal('sales_commission');
-            $table->decimal('legth');
+            $table->decimal('length');
             $table->decimal('latitude');
             $table->boolean('inactive');
 
@@ -35,8 +35,8 @@ return new class extends Migration
                     ->on('users')
                     ->onDelete('set null');
 
-
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -47,7 +47,7 @@ return new class extends Migration
     {
         Schema::table('loan_roads', function(Blueprint $table) {
            $table->dropForeign(['user_id']);
-           $table->dropForeign(['supervisor_id']);
+           $table->dropForeign(['user_id']);
         });
 
         Schema::dropIfExists('loan_roads');
