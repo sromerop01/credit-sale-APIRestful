@@ -57,7 +57,6 @@ class User extends Authenticatable
      */
     public function loanRoads()
     {
-        // Laravel asume automáticamente que la llave foránea es 'user_id'
         return $this->hasMany(LoanRoad::class);
     }
 
@@ -66,7 +65,6 @@ class User extends Authenticatable
      */
     public function supervisedLoanRoads()
     {
-        // Aquí debemos especificar 'supervisor_id' porque no sigue la convención por defecto
         return $this->hasMany(LoanRoad::class, 'supervisor_id');
     }
 }
