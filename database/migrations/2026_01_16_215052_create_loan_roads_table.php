@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('sales_commission');
             $table->decimal('length');
             $table->decimal('latitude');
-            $table->boolean('inactive');
+            $table->boolean('inactive')->default(false);
 
             $table->unsignedBigInteger('user_id')
                     ->nullable();
@@ -47,7 +47,7 @@ return new class extends Migration
     {
         Schema::table('loan_roads', function(Blueprint $table) {
            $table->dropForeign(['user_id']);
-           $table->dropForeign(['user_id']);
+           $table->dropForeign(['supervisor_id']);
         });
 
         Schema::dropIfExists('loan_roads');

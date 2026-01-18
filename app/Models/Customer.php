@@ -40,8 +40,13 @@ class Customer extends Model
             'identification' => 'integer',
             'delinquent' => 'boolean',
             'quota' => 'integer',
-            'interest' => 'decimal',
+            'interest' => 'decimal:2',
             'order' => 'integer',
         ];
+    }
+
+    public function loanRoad()
+    {
+        return $this->belongsTo(LoanRoad::class);
     }
 }

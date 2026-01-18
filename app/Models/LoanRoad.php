@@ -38,9 +38,9 @@ class LoanRoad extends Model
     {
         return [
             'start_date' => 'date',
-            'sales_commission' => 'decimal',
-            'length' => 'decimal',
-            'latitude' => 'decimal',
+            'sales_commission' => 'decimal:2',
+            'length' => 'decimal:2',
+            'latitude' => 'decimal:2',
             'inactive' => 'boolean',
         ];
     }
