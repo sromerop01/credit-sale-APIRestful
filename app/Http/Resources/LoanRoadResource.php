@@ -20,8 +20,8 @@ class LoanRoadResource extends JsonResource
             'detail' => $this->detail,
             'status' => $this->inactive ? 'Inactivo' : 'Activo',
             'dates' => [
-                'start' => $this->start_date->format('Y-m-d'),
-                'created' => $this->created_at->diffForHumans(),
+                'start' => $this->start_date?->format('Y-m-d'),
+                'created' => $this->created_at?->diffForHumans(),
             ],
 
             'seller' => $this->user->name ?? 'Sin asignar',

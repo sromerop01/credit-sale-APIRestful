@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\ApiResponse;
 use App\Http\Requests\StoreLoanRoadRequest;
 use App\Http\Requests\UpdateLoanRoadRequest;
 use App\Http\Resources\LoanRoadResource;
@@ -11,7 +12,6 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 
 class LoanRoadController extends Controller
 {
@@ -22,51 +22,21 @@ class LoanRoadController extends Controller
     public function index(Request $request)
     {
         try {
+            $perPage = $request->get('per_page', 10);
             $loanRoads = LoanRoad::with(['user', 'supervisor'])
-                ->when($request->get('per_page'), function($query, $perPage){
+                ->paginate($perPage);
 
-                    return $query->paginate($perPage);
-
-                }, function($query){
-
-                    return $query->get();
-                });
-
-                return response()->json(LoanRoadResource::collection($loanRoads), Response::HTTP_OK);
-
-        } catch (Exception $e) {
-            Log::error('Error al obtener rutas: '. $e->getMessage());
-
-            return response()->json([
-                'message' => 'Ocurrio un error inesperado al cargar las rutas',
-                'error' => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * POST /api/loan-roads
-     * Crear una nueva ruta
-     */
-    public function store(StoreLoanRoadRequest $request)
-    {
-        try {
-            $validated = $request->validated();
-
-            DB::beginTransaction();
-            $loanRoad = LoanRoad::create($validated);
-            DB::commit();
-
-            return new LoanRoadResource($loanRoad);
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Error al crear ruta: '. $e->getMessage());
-
-            return response()->json([
-                'message' => 'No se puede crear la ruta. Intente nuevamente',
-                'error' => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::paginated(
+                $loanRoads,
+                LoanRoadResource::class,
+                'Rutas obtenidas exitosamente'
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error(
+                'Error al obtener las rutas',
+                ['error' => $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
@@ -78,15 +48,36 @@ class LoanRoadController extends Controller
     {
         try {
             $loanRoad = LoanRoad::with(['user', 'supervisor'])->findOrFail($id);
-            return new LoanRoadResource($loanRoad);
+            return ApiResponse::success(
+                new LoanRoadResource($loanRoad),
+                'Ruta encontrada exitosamente'
+            );
 
         } catch (Exception $e) {
             Log::error('Error mostrando ruta ' . $id . ': ' . $e->getMessage());
+            return ApiResponse::notFound('Ruta no encontrada');
+        }
+    }
 
-            return response()->json([
-                'message' => 'Error al buscar la ruta.',
-                'error'   => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    /**
+     * POST /api/loan-roads
+     * Crear una nueva ruta
+     */
+    public function store(StoreLoanRoadRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $loanRoad = LoanRoad::create($validated);
+
+            return ApiResponse::success(
+                new LoanRoadResource($loanRoad),
+                'Ruta creada exitosamente',
+                Response::HTTP_CREATED
+            );
+
+        } catch (Exception $e) {
+            Log::error('Error al crear ruta: '. $e->getMessage());
+            return ApiResponse::error('No se puede crear la ruta. Intente nuevamente', [], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -99,22 +90,17 @@ class LoanRoadController extends Controller
         try {
             $validated = $request->validated();
 
-            DB::beginTransaction();
             $loanRoad = LoanRoad::findOrFail($id);
             $loanRoad->update($validated);
-            DB::commit();
 
-            return new LoanRoadResource($loanRoad);
+            return ApiResponse::success(
+                new LoanRoadResource($loanRoad),
+                'Ruta actualizada exitosamente'
+            );
 
         } catch (Exception $e) {
-            DB::rollBack();
-
             Log::error('Error actualizando ruta: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Error al actualizar la ruta.',
-                'error'   => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::notFound('Ruta no encontrada para actualizar');
         }
     }
 
@@ -122,24 +108,17 @@ class LoanRoadController extends Controller
      * DELETE /api/loan-roads/{id}
      * Eliminar un ruta
      */
-    public function destroy($id)
+    public function destroy(string $id)
     {
         try {
-
             $loanRoad = LoanRoad::findOrFail($id);
             $loanRoad->delete();
 
-            return response()->json([
-                'message' => 'Ruta eliminada correctamente'
-            ], Response::HTTP_OK);
+            return response()->json(null, Response::HTTP_NO_CONTENT);
 
         } catch (Exception $e) {
             Log::error('Error eliminando ruta: ' . $e->getMessage());
-
-            return response()->json([
-                'message' => 'Error al eliminar la ruta.',
-                'error'   => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::notFound('Ruta no encontrada para eliminar');
         }
     }
 }
