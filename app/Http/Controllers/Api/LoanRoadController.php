@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateLoanRoadRequest;
 use App\Http\Resources\LoanRoadResource;
 use App\Models\LoanRoad;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +20,7 @@ class LoanRoadController extends Controller
      * GET /api/loan-roads
      * Listar todas las rutas
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
             $perPage = $request->get('per_page', 10);
@@ -44,7 +45,7 @@ class LoanRoadController extends Controller
      * GET /api/loan-roads/{id}
      * Ver una ruta específica
      */
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         try {
             $loanRoad = LoanRoad::with(['user', 'supervisor'])->findOrFail($id);
@@ -63,7 +64,7 @@ class LoanRoadController extends Controller
      * POST /api/loan-roads
      * Crear una nueva ruta
      */
-    public function store(StoreLoanRoadRequest $request)
+    public function store(StoreLoanRoadRequest $request): JsonResponse
     {
         try {
             $validated = $request->validated();
@@ -85,7 +86,7 @@ class LoanRoadController extends Controller
      * PUT /api/loan-roads/{id}
      * Actualizar una ruta
      */
-    public function update(UpdateLoanRoadRequest $request, string $id)
+    public function update(UpdateLoanRoadRequest $request, string $id): JsonResponse
     {
         try {
             $validated = $request->validated();
@@ -108,7 +109,7 @@ class LoanRoadController extends Controller
      * DELETE /api/loan-roads/{id}
      * Eliminar un ruta
      */
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         try {
             $loanRoad = LoanRoad::findOrFail($id);

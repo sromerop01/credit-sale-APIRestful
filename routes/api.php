@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\LoanRoadController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\UserController;
 use App\Models\LoanRoad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +19,6 @@ Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
 
     Route::apiResource('loan-roads', LoanRoadController::class);
 
-    //Route::apiResource('customers', CustomerController::class);
+    Route::apiResource('customers', CustomerController::class);
 
 });

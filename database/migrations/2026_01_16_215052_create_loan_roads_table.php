@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('loan_roads', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('detail');
+            $table->string('detail')->nullable()->default(null);
             $table->date('start_date');
             $table->decimal('sales_commission');
             $table->decimal('length');
