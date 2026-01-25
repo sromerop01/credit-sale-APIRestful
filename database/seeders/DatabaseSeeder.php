@@ -26,7 +26,32 @@ class DatabaseSeeder extends Seeder
     ]);
 
     //Crear un Supervisor
-    $supervisor = User::factory()->create(['level' => 'supervisor', 'name' => 'El Supervisor']);
+    $supervisor = User::factory()->create([
+        'name' => 'Santiago Supervisor',
+        'email' => 'supervisor@supervisor.com',
+        'password' => bcrypt('supervisorpass'),
+        'level' => 'supervisor',
+    ]);
+
+    // Crear un vendedor asignado al supervisor
+    $vendedorAsignado = User::factory()->create([
+        'name' => 'Santiago Vendedor',
+        'email' => 'vendedor@vendedor.com',
+        'password' => bcrypt('vendedorpass'),
+        'level' => 'vendedor',
+
+    ]);
+
+    // Crear una Ruta para el vendedor asignado
+    $rutaAsignada = LoanRoad::factory()->create([
+        'user_id' => $vendedorAsignado->id,
+        'supervisor_id' => $supervisor->id
+    ]);
+
+    // Crear 20 clientes para la ruta del vendedor asignado
+    Customer::factory()->count(20)->create([
+        'loan_road_id' => $rutaAsignada->id
+    ]);
 
     //Crear 5 Vendedores
     $vendedores = User::factory()->count(5)->create(['level' => 'vendedor']);

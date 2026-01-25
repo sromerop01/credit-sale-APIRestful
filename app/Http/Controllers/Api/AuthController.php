@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -41,7 +42,13 @@ class AuthController extends Controller
         try {
             $user = JWTAuth::user();
 
-            return ApiResponse::success($user, 'Usuario obtenido correctamente');
+            $user->load(['loanRoads', 'supervisedLoanRoads'])
+                ->loadCount(['loanRoads', 'supervisedLoanRoads']);
+
+            return ApiResponse::success(
+                new UserResource($user),
+                'Usuario obtenido correctamente'
+            );
         } catch (JWTException $e) {
             Log::error('Failed to get authenticated user', ['error' => $e->getMessage()]);
 
