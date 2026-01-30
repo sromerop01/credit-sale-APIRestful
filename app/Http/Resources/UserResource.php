@@ -19,15 +19,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'level' => [
-                'value' => $this->level,
-                'display' => match ($this->level) {
-                    'Vendedor' => 'Vendedor',
-                    'Supervisor' => 'Supervisor',
-                    'Administrador' => 'Administrador',
-                    default => 'Desconocido'
-                },
-            ],
+            'level' => $this->level,
 
             // Contadores de relaciones
             'loan_roads_count' => $this->when(isset($this->loan_roads_count), $this->loan_roads_count),
