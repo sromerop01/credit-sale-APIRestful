@@ -13,7 +13,6 @@ class LoanRoad extends Model
     protected $fillable = [
         'name',
         'detail',
-        'total',
         'start_date',
         'sales_commission',
         'length',
