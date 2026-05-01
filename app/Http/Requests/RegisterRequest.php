@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-class LoginRequest extends ApiFormRequest
+class RegisterRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,8 +20,11 @@ class LoginRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:8',
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|unique:users,phone',
+            'password' => 'required|min:8',
+            'level' => 'required|in:administrador,supervisor,vendedor',
         ];
     }
 }
