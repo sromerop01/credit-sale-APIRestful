@@ -20,17 +20,23 @@ Este proyecto está en desarrollo y actualmente incluye:
 
 ## Instalación
 
+Este proyecto usa **Laravel Sail** (Docker) para la base de datos MySQL. Asegúrate de tener Docker corriendo antes de ejecutar cualquier comando de base de datos.
+
 1. Clona el repositorio
 2. Ejecuta `composer install`
 3. Copia `.env.example` a `.env` y configura tu base de datos
 4. Ejecuta `php artisan key:generate`
-5. Ejecuta `php artisan migrate`
-6. Instala dependencias de frontend con `npm install`
-7. Inicia el servidor con `php artisan serve`
+5. Levanta los contenedores con `./vendor/bin/sail up -d`
+6. Ejecuta las migraciones con `./vendor/bin/sail artisan migrate`
+7. Instala dependencias de frontend con `npm install`
+
+> **Importante:** No uses `php artisan migrate` directamente — la base de datos corre dentro de Docker. Usa siempre `./vendor/bin/sail artisan migrate`.
 
 ## Scripts Disponibles
 
-- `composer setup`: Instalación completa del proyecto
+- `./vendor/bin/sail up -d`: Levanta los contenedores en segundo plano
+- `./vendor/bin/sail down`: Detiene los contenedores
+- `./vendor/bin/sail artisan migrate`: Ejecuta las migraciones
 - `composer dev`: Inicia servidor, cola, logs y vite en modo desarrollo
 - `composer test`: Ejecuta los tests
 
