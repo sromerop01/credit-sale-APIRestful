@@ -30,8 +30,6 @@ Este proyecto usa **Laravel Sail** (Docker) para la base de datos MySQL. Asegúr
 6. Ejecuta las migraciones con `./vendor/bin/sail artisan migrate`
 7. Instala dependencias de frontend con `npm install`
 
-> **Importante:** No uses `php artisan migrate` directamente — la base de datos corre dentro de Docker. Usa siempre `./vendor/bin/sail artisan migrate`.
-
 ## Scripts Disponibles
 
 - `./vendor/bin/sail up -d`: Levanta los contenedores en segundo plano
