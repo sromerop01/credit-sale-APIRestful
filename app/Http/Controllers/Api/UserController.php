@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -18,12 +19,16 @@ class UserController extends Controller
     /**
      * GET /api/users
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $users = User::all();
-            return ApiResponse::success(
-                UserResource::collection($users),
+            $perPage = $request->get('per_page', 10);
+            $users = User::orderBy('name', 'asc')
+                ->paginate($perPage);
+
+            return ApiResponse::paginated(
+                $users,
+                UserResource::class,
                 'Usuarios obtenidos exitosamente'
             );
         } catch (Exception $e) {

@@ -16,11 +16,11 @@ Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
     Route::prefix('auth')->controller(AuthController::class)->group(function(){
 
         Route::middleware('guest')->group(function(){
-            Route::post('register', 'register')->name('auth.register');
             Route::post('login', 'login')->name('auth.login');
         });
 
         Route::middleware('jwt.auth')->group(function(){
+            Route::post('register', 'register')->name('auth.register');
             Route::get('me', 'me')->name('auth.me');
             Route::post('logout', 'logout')->name('auth.logout');
             Route::post('refresh-token', 'refreshToken')->name('auth.refreshToken');

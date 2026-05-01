@@ -33,7 +33,7 @@ class CustomerController extends Controller
                 CustomerResource::class,
                 'Clientes obtenidos exitosamente'
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return ApiResponse::error(
                 'Error al obtener los clientes',
                 ['error' => $e->getMessage()],
