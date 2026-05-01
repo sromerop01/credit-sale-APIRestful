@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone')->after('email_verified_at');
-            $table->enum('level', ['Vendedor', 'Supervisor', 'Administrador'])->after('password');
+            $table->enum('level', ['vendedor', 'supervisor', 'administrador'])->after('password');
             $table->softDeletes();
         });
     }

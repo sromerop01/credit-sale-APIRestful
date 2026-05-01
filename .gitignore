@@ -12,6 +12,8 @@
 /.vscode
 /.zed
 /auth.json
+package-lock.json
+task.md
 /node_modules
 /public/build
 /public/hot
