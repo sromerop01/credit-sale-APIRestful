@@ -11,7 +11,8 @@ class ApiFormRequest extends FormRequest
 {
     protected function failedValidation(Validator $validator) {
         throw new HttpResponseException(response()->json([
-            'message' => 'Error de validacion',
+            'success' => false,
+            'message' => 'Error de validación',
             'errors' => $validator->errors()
         ], Response::HTTP_UNPROCESSABLE_ENTITY));
     }
