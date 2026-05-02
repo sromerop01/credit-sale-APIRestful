@@ -18,21 +18,26 @@ Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
     Route::prefix('auth')->controller(AuthController::class)->group(function(){
 
         Route::middleware('guest')->group(function(){
-            Route::post('login', 'login')->name('auth.login');
+            Route::post('login', 'login')
+                ->name('auth.login');
         });
 
         Route::middleware('jwt.auth')->group(function(){
             Route::post('register', 'register')
                 ->middleware('level:administrador')
                 ->name('auth.register');
-            Route::get('me', 'me')->name('auth.me');
-            Route::post('logout', 'logout')->name('auth.logout');
-            Route::post('refresh-token', 'refreshToken')->name('auth.refreshToken');
+            Route::get('me', 'me')
+                ->name('auth.me');
+            Route::post('logout', 'logout')
+                ->name('auth.logout');
+            Route::post('refresh-token', 'refreshToken')
+                ->name('auth.refreshToken');
         });
     });
 
     Route::middleware('jwt.auth')->group(function () {
-        Route::apiResource('users', UserController::class);
+        Route::apiResource('users', UserController::class)
+            ->middleware('level:administrador,supervisor');
         Route::apiResource('customers', CustomerController::class);
         Route::apiResource('loan-roads', LoanRoadController::class);
     });
