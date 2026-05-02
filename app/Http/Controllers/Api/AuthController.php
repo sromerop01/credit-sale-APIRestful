@@ -8,6 +8,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,16 +19,20 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class AuthController extends Controller
 {
 
-    public function register(RegisterRequest $request){
-        $data = $request->validated();
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        try {
+            $user = User::create($request->validated());
 
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'password' => bcrypt($data['password']),
-            'level' => $data['level'],
-        ]);
+            return ApiResponse::success(
+                new UserResource($user),
+                'Usuario registrado exitosamente',
+                Response::HTTP_CREATED
+            );
+        } catch (Exception $e) {
+            Log::error('Error al registrar usuario: ' . $e->getMessage());
+            return ApiResponse::error('No se pudo registrar el usuario', [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

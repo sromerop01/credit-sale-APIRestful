@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
 
     // Health Check
-    Route::get('health', fn() => response()->json(['status' => 'ok']))->name('health');
+    Route::get('health', fn() => response()
+        ->json(['status' => 'ok']))
+        ->name('health');
 
     Route::prefix('auth')->controller(AuthController::class)->group(function(){
 
@@ -20,12 +22,13 @@ Route::prefix('v1')->middleware(['throttle:60,1'])->group(function () {
         });
 
         Route::middleware('jwt.auth')->group(function(){
-            Route::post('register', 'register')->name('auth.register');
+            Route::post('register', 'register')
+                ->middleware('level:administrador')
+                ->name('auth.register');
             Route::get('me', 'me')->name('auth.me');
             Route::post('logout', 'logout')->name('auth.logout');
             Route::post('refresh-token', 'refreshToken')->name('auth.refreshToken');
         });
-
     });
 
     Route::middleware('jwt.auth')->group(function () {
