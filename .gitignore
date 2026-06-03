@@ -14,6 +14,8 @@
 /auth.json
 package-lock.json
 task.md
+test.md
+policy.md
 /node_modules
 /public/build
 /public/hot

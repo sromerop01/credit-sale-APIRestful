@@ -61,7 +61,7 @@ class AuthController extends Controller
     public function me(): JsonResponse
     {
         try {
-            $user = JWTAuth::user();
+            $user = auth()->user();
 
             $user->load(['loanRoads', 'supervisedLoanRoads'])
                 ->loadCount(['loanRoads', 'supervisedLoanRoads']);

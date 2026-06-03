@@ -27,9 +27,10 @@ class LoanRoadResource extends JsonResource
             'seller' => $this->user->name ?? 'Sin asignar',
             'supervisor' => $this->supervisor->name ?? 'Sin asignar',
             'metrics' => [
-                'latitude' => $this->latitude,
+                'latitude'   => $this->latitude,
+                'longitude'  => $this->longitude,
                 'commission' => $this->sales_commission . '%',
-                'length' => $this->length . ' km',
+                'length'     => $this->length . ' km',
             ]
         ];
     }

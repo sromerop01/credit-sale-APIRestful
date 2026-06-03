@@ -25,8 +25,9 @@ class UpdateLoanRoadRequest extends ApiFormRequest
             'start_date' => 'sometimes|required|date',
             'sales_commission' => 'sometimes|required|numeric',
             'length' => 'sometimes|required|numeric',
-            'latitude' => 'sometimes|required|numeric',
-            'inactive' => 'sometimes|required|boolean',
+            'latitude'  => 'sometimes|required|numeric',
+            'longitude' => 'sometimes|required|numeric',
+            'inactive'  => 'sometimes|required|boolean',
             'user_id' => 'sometimes|required|exists:users,id',
             'supervisor_id' => 'sometimes|required|exists:users,id',
 

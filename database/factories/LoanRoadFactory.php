@@ -23,8 +23,9 @@ class LoanRoadFactory extends Factory
             'start_date' => fake()->date(),
             'sales_commission' => fake()->randomFloat(2, 1, 15),
             'length' => fake()->randomFloat(2, 10, 500),
-            'latitude' => fake()->latitude(),
-            'inactive' => fake()->boolean(),
+            'latitude'  => fake()->latitude(),
+            'longitude' => fake()->longitude(),
+            'inactive'  => fake()->boolean(),
 
             'user_id' => User::factory(),
             'supervisor_id' => User::factory(),

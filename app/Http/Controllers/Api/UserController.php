@@ -23,8 +23,14 @@ class UserController extends Controller
     {
         try {
             $perPage = $request->get('per_page', 10);
-            $users = User::orderBy('name', 'asc')
-                ->paginate($perPage);
+
+            $query = User::orderBy('name', 'asc');
+
+            if ($level = $request->get('level')) {
+                $query->where('level', $level);
+            }
+
+            $users = $query->paginate($perPage);
 
             return ApiResponse::paginated(
                 $users,
@@ -88,7 +94,7 @@ class UserController extends Controller
             $validated = $request->validated();
 
             $user = User::findOrFail($id);
-            $user->update($validated);
+            $user->fill($validated)->save();
 
             return ApiResponse::success(
                 new UserResource($user),

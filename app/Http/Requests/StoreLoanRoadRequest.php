@@ -25,8 +25,9 @@ class StoreLoanRoadRequest extends ApiFormRequest
             'start_date' => 'required|date',
             'sales_commission' => 'required|numeric',
             'length' => 'required|numeric',
-            'latitude' => 'required|numeric',
-            'inactive' => 'required|boolean',
+            'latitude'  => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'inactive'  => 'required|boolean',
             'user_id' => 'required|exists:users,id',
             'supervisor_id' => 'required|exists:users,id',
         ];

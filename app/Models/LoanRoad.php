@@ -17,6 +17,7 @@ class LoanRoad extends Model
         'sales_commission',
         'length',
         'latitude',
+        'longitude',
         'inactive',
         'user_id',
         'supervisor_id'
@@ -39,8 +40,9 @@ class LoanRoad extends Model
             'start_date' => 'date',
             'sales_commission' => 'decimal:2',
             'length' => 'decimal:2',
-            'latitude' => 'decimal:2',
-            'inactive' => 'boolean',
+            'latitude'  => 'decimal:7',
+            'longitude' => 'decimal:7',
+            'inactive'  => 'boolean',
         ];
     }
 

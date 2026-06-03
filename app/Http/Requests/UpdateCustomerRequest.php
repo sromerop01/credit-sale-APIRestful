@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class UpdateCustomerRequest extends ApiFormRequest
 {
     /**
@@ -20,7 +22,7 @@ class UpdateCustomerRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'identification' => 'sometimes|required|numeric|unique:customers,identification',
+            'identification' => ['sometimes', 'required', 'numeric', Rule::unique('customers', 'identification')->ignore($this->route('id'))],
             'name'           => 'sometimes|required|string|max:255',
             'address'        => 'sometimes|required|string',
             'phone'          => 'sometimes|required|string',

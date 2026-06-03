@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class LoanRoadController extends Controller
@@ -24,8 +25,22 @@ class LoanRoadController extends Controller
     {
         try {
             $perPage = $request->get('per_page', 10);
-            $loanRoads = LoanRoad::with(['user', 'supervisor'])
-                ->paginate($perPage);
+
+            $query = LoanRoad::with(['user', 'supervisor']);
+
+            if ($request->has('inactive')) {
+                $query->where('inactive', $request->boolean('inactive'));
+            }
+
+            if ($userId = $request->get('user_id')) {
+                $query->where('user_id', $userId);
+            }
+
+            if ($supervisorId = $request->get('supervisor_id')) {
+                $query->where('supervisor_id', $supervisorId);
+            }
+
+            $loanRoads = $query->paginate($perPage);
 
             return ApiResponse::paginated(
                 $loanRoads,
@@ -49,6 +64,11 @@ class LoanRoadController extends Controller
     {
         try {
             $loanRoad = LoanRoad::with(['user', 'supervisor'])->findOrFail($id);
+
+            if (Gate::denies('view', $loanRoad)) {
+                return ApiResponse::forbidden('No tienes permisos para ver esta ruta');
+            }
+
             return ApiResponse::success(
                 new LoanRoadResource($loanRoad),
                 'Ruta encontrada exitosamente'
@@ -89,10 +109,13 @@ class LoanRoadController extends Controller
     public function update(UpdateLoanRoadRequest $request, string $id): JsonResponse
     {
         try {
-            $validated = $request->validated();
+            $loanRoad = LoanRoad::with(['user', 'supervisor'])->findOrFail($id);
 
-            $loanRoad = LoanRoad::findOrFail($id);
-            $loanRoad->update($validated);
+            if (Gate::denies('update', $loanRoad)) {
+                return ApiResponse::forbidden('No tienes permisos para editar esta ruta');
+            }
+
+            $loanRoad->fill($request->validated())->save();
 
             return ApiResponse::success(
                 new LoanRoadResource($loanRoad),

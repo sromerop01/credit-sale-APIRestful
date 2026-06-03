@@ -8,11 +8,13 @@ use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
+use App\Models\User;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class CustomerController extends Controller
 {
@@ -24,9 +26,23 @@ class CustomerController extends Controller
     {
         try {
             $perPage = $request->get('per_page', 10);
-            $customers = Customer::with('loanRoad')
-                ->orderBy('order', 'asc')
-                ->paginate($perPage);
+            $user    = User::find(auth()->id());
+
+            $query = Customer::with('loanRoad')->orderBy('order', 'asc');
+
+            if ($user->level === 'vendedor') {
+                $query->whereHas('loanRoad', fn ($q) => $q->where('user_id', $user->id));
+            }
+
+            if ($loanRoadId = $request->get('loan_road_id')) {
+                $query->where('loan_road_id', $loanRoadId);
+            }
+
+            if ($request->has('delinquent')) {
+                $query->where('delinquent', filter_var($request->get('delinquent'), FILTER_VALIDATE_BOOLEAN));
+            }
+
+            $customers = $query->paginate($perPage);
 
             return ApiResponse::paginated(
                 $customers,
@@ -50,6 +66,11 @@ class CustomerController extends Controller
     {
         try {
             $customer = Customer::with('loanRoad')->findOrFail($id);
+
+            if (Gate::denies('view', $customer)) {
+                return ApiResponse::forbidden('No tienes permisos para ver este cliente');
+            }
+
             return ApiResponse::success(
                 new CustomerResource($customer),
                 'Cliente encontrado exitosamente'
@@ -90,10 +111,13 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, string $id): JsonResponse
     {
         try {
-            $validated = $request->validated();
+            $customer = Customer::with('loanRoad')->findOrFail($id);
 
-            $customer = Customer::findOrFail($id);
-            $customer->update($validated);
+            if (Gate::denies('update', $customer)) {
+                return ApiResponse::forbidden('No tienes permisos para editar este cliente');
+            }
+
+            $customer->fill($request->validated())->save();
 
             return ApiResponse::success(
                 new CustomerResource($customer),

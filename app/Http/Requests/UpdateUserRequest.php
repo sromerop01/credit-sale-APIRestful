@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class UpdateUserRequest extends ApiFormRequest
 {
     /**
@@ -21,7 +23,7 @@ class UpdateUserRequest extends ApiFormRequest
     {
         return [
             'name'           => 'sometimes|required|string|max:255',
-            'email'          => 'sometimes|required|string|email|max:255|unique:users,email',
+            'email'          => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
             'phone'          => 'sometimes|required|string',
             'password'       => 'sometimes|required|string|min:8|confirmed',
             'level'          => 'sometimes|required|string|in:administrador,vendedor,supervisor',
