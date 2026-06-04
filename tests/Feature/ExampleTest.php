@@ -1,7 +1,5 @@
 <?php
 
-test('the application returns a successful response', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
+test('health check retorna ok', function () {
+    $this->getJson('/api/v1/health')->assertOk()->assertJson(['status' => 'ok']);
 });
