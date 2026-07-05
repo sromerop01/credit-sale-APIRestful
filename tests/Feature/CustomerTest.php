@@ -65,6 +65,29 @@ test('vendedor no puede ver customer de otra ruta (403)', function () {
     $this->getJson("/api/v1/customers/{$customer->id}", authHeaders($vendedor))->assertForbidden();
 });
 
+// ── Store ─────────────────────────────────────────────────────────────────────
+
+test('vendedor puede crear customer en su propia ruta', function () {
+    $vendedor = User::factory()->create(['level' => 'vendedor']);
+    $ruta     = LoanRoad::factory()->create(['user_id' => $vendedor->id]);
+    $payload  = Customer::factory()->make(['loan_road_id' => $ruta->id])->toArray();
+
+    $this->postJson('/api/v1/customers', $payload, authHeaders($vendedor))
+        ->assertCreated();
+});
+
+test('vendedor no puede crear customer en ruta ajena (403)', function () {
+    $vendedor     = User::factory()->create(['level' => 'vendedor']);
+    $otroVendedor = User::factory()->create(['level' => 'vendedor']);
+    $otraRuta     = LoanRoad::factory()->create(['user_id' => $otroVendedor->id]);
+    $payload      = Customer::factory()->make(['loan_road_id' => $otraRuta->id])->toArray();
+
+    $this->postJson('/api/v1/customers', $payload, authHeaders($vendedor))
+        ->assertForbidden();
+
+    $this->assertDatabaseMissing('customers', ['identification' => $payload['identification']]);
+});
+
 // ── Update ────────────────────────────────────────────────────────────────────
 
 test('vendedor puede actualizar customer de su ruta', function () {
@@ -86,6 +109,20 @@ test('vendedor no puede actualizar customer de otra ruta (403)', function () {
     $this->putJson("/api/v1/customers/{$customer->id}", [
         'name' => 'Intento',
     ], authHeaders($vendedor))->assertForbidden();
+});
+
+test('vendedor no puede reasignar customer a ruta ajena (403)', function () {
+    $vendedor     = User::factory()->create(['level' => 'vendedor']);
+    $otroVendedor = User::factory()->create(['level' => 'vendedor']);
+    $miRuta       = LoanRoad::factory()->create(['user_id' => $vendedor->id]);
+    $otraRuta     = LoanRoad::factory()->create(['user_id' => $otroVendedor->id]);
+    $customer     = Customer::factory()->create(['loan_road_id' => $miRuta->id]);
+
+    $this->putJson("/api/v1/customers/{$customer->id}", [
+        'loan_road_id' => $otraRuta->id,
+    ], authHeaders($vendedor))->assertForbidden();
+
+    $this->assertDatabaseHas('customers', ['id' => $customer->id, 'loan_road_id' => $miRuta->id]);
 });
 
 test('actualizar customer sin cambiar identification no da 422', function () {

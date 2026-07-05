@@ -8,6 +8,7 @@ use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
+use App\Models\LoanRoad;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -90,6 +91,13 @@ class CustomerController extends Controller
     {
         try {
             $validated = $request->validated();
+
+            $loanRoad = LoanRoad::findOrFail($validated['loan_road_id']);
+
+            if (Gate::denies('create', [Customer::class, $loanRoad])) {
+                return ApiResponse::forbidden('No tienes permisos para crear clientes en esta ruta');
+            }
+
             $customer = Customer::create($validated);
 
             return ApiResponse::success(
@@ -117,7 +125,17 @@ class CustomerController extends Controller
                 return ApiResponse::forbidden('No tienes permisos para editar este cliente');
             }
 
-            $customer->fill($request->validated())->save();
+            $validated = $request->validated();
+
+            if (isset($validated['loan_road_id']) && $validated['loan_road_id'] != $customer->loan_road_id) {
+                $targetLoanRoad = LoanRoad::findOrFail($validated['loan_road_id']);
+
+                if (Gate::denies('create', [Customer::class, $targetLoanRoad])) {
+                    return ApiResponse::forbidden('No tienes permisos para mover este cliente a la ruta indicada');
+                }
+            }
+
+            $customer->fill($validated)->save();
 
             return ApiResponse::success(
                 new CustomerResource($customer),
