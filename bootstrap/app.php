@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'level' => CheckLevel::class,
         ]);
+
+        // Necesario para cifrar/descifrar la cookie HttpOnly del JWT en el grupo 'api'.
+        $middleware->api(prepend: [
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

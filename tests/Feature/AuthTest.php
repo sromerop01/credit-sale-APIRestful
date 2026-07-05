@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Models\User;
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 
-test('login con credenciales válidas retorna token', function () {
+test('login con credenciales válidas no expone el token en el body y lo setea como cookie HttpOnly', function () {
     User::factory()->create(['email' => 'test@test.com', 'password' => 'password123', 'level' => 'vendedor']);
 
     $response = $this->postJson('/api/v1/auth/login', [
@@ -13,7 +14,33 @@ test('login con credenciales válidas retorna token', function () {
     ]);
 
     $response->assertOk()
-        ->assertJsonStructure(['data' => ['token', 'token_type', 'expires_in']]);
+        ->assertJsonStructure(['data' => ['token_type', 'expires_in']])
+        ->assertJsonMissingPath('data.token');
+
+    $cookie = collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === AuthController::TOKEN_COOKIE);
+
+    expect($cookie)->not->toBeNull();
+    expect($cookie->isHttpOnly())->toBeTrue();
+});
+
+test('me autentica usando solo la cookie del login, sin header Authorization', function () {
+    User::factory()->create(['email' => 'cookie@test.com', 'password' => 'password123', 'level' => 'vendedor']);
+
+    $login = $this->postJson('/api/v1/auth/login', [
+        'email'    => 'cookie@test.com',
+        'password' => 'password123',
+    ])->assertOk();
+
+    $cookie = collect($login->headers->getCookies())->first(fn ($c) => $c->getName() === AuthController::TOKEN_COOKIE);
+
+    // El valor de la cookie ya viene cifrado por EncryptCookies; se reenvía tal cual,
+    // igual que haría el navegador, en vez de usar withCookie() (que cifraría de nuevo).
+    // withCredentials() simula que el cliente incluye cookies en la petición (XHR/fetch).
+    $this->withCredentials()
+        ->withUnencryptedCookie(AuthController::TOKEN_COOKIE, $cookie->getValue())
+        ->getJson('/api/v1/auth/me')
+        ->assertOk()
+        ->assertJsonPath('data.email', 'cookie@test.com');
 });
 
 test('login con credenciales inválidas retorna 401', function () {
@@ -69,11 +96,15 @@ test('vendedor no puede registrar usuarios (403)', function () {
 
 // ── Logout ────────────────────────────────────────────────────────────────────
 
-test('logout invalida el token', function () {
+test('logout invalida el token y limpia la cookie', function () {
     $user = User::factory()->create(['level' => 'vendedor']);
     $headers = authHeaders($user);
 
-    $this->postJson('/api/v1/auth/logout', [], $headers)->assertOk();
+    $response = $this->postJson('/api/v1/auth/logout', [], $headers)->assertOk();
+
+    $cookie = collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === AuthController::TOKEN_COOKIE);
+    expect($cookie)->not->toBeNull();
+    expect($cookie->getExpiresTime())->toBeLessThan(time());
 
     // El token ya no debe ser válido
     $this->getJson('/api/v1/auth/me', $headers)->assertUnauthorized();

@@ -12,12 +12,17 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    /**
+     * Nombre de la cookie HttpOnly donde se guarda el JWT.
+     */
+    public const TOKEN_COOKIE = 'jwt_token';
 
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -91,7 +96,8 @@ class AuthController extends Controller
 
             JWTAuth::invalidate($token);
 
-            return ApiResponse::success(null, 'Sesión cerrada correctamente');
+            return ApiResponse::success(null, 'Sesión cerrada correctamente')
+                ->withCookie(Cookie::forget(self::TOKEN_COOKIE));
         } catch (JWTException $e) {
             Log::error('JWT logout failed', ['error' => $e->getMessage()]);
 
@@ -122,14 +128,22 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the token array structure
+     * Setea el JWT como cookie HttpOnly y responde sin exponer el token en el body.
      */
     protected function respondWithToken(string $token): JsonResponse
     {
+        $ttlMinutes = JWTAuth::factory()->getTTL();
+
         return ApiResponse::success([
-            'token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60,
-        ], 'Autenticación exitosa');
+            'expires_in' => $ttlMinutes * 60,
+        ], 'Autenticación exitosa')->withCookie(cookie(
+            name: self::TOKEN_COOKIE,
+            value: $token,
+            minutes: $ttlMinutes,
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+        ));
     }
 }
